@@ -504,10 +504,11 @@ footer a:hover{color:#fff;opacity:.8}
       <p class="sub">No jargon needed. Write it how you'd explain it to a friend. I'll come back with an honest answer on whether I can help and roughly what it would take.</p>
       <a href="mailto:mnfinance664@gmail.com" style="font-size:19px;font-weight:600;text-decoration:none;min-height:44px;display:inline-flex;align-items:center">mnfinance664@gmail.com</a>
     </div>
-    <form id="enquiry" name="enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" aria-label="Project enquiry">
-      <input type="hidden" name="form-name" value="enquiry">
+    <form id="enquiry" action="https://formsubmit.co/mnfinance664@gmail.com" method="POST" aria-label="Project enquiry">
+      <input type="hidden" name="_subject" value="New project enquiry from your website">
+      <input type="hidden" name="_template" value="table">
       <input type="hidden" name="budget" value="Not sure yet">
-      <p hidden><label>Leave this empty <input name="bot-field"></label></p>
+      <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="grid" style="--min:220px;gap:16px">
         <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
         <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
@@ -563,18 +564,19 @@ chips.forEach(b => b.addEventListener('click', () => {
   form.budget.value = b.textContent;
 }));
 
-// Netlify Forms picks up the POST; without JS the form still posts and Netlify shows its own thank-you page.
+// FormSubmit emails each enquiry; without JS the form still posts and FormSubmit shows its own thank-you page.
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const btn = form.querySelector('[type="submit"]');
   btn.disabled = true;
   try {
-    const res = await fetch('/', {
+    const res = await fetch(form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(new FormData(form)).toString()
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(form)
     });
-    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!res.ok || String(data.success) !== 'true') throw new Error(data.message || res.status);
     form.reset();
     chips[chips.length - 1].click();
     msg.style.color = '#4ADE80';
